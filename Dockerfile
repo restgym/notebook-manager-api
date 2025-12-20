@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 
-ENV API=notebookmanager
+ENV API=notebook-manager
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN mkdir /api && \
@@ -15,11 +15,11 @@ RUN apt update && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
-COPY apis/notebookmanager/notebookmanager.jar /api/notebookmanager.jar
-COPY apis/notebookmanager/classes/ /api/classes/
-COPY apis/notebookmanager/database/ /api/database/
-COPY apis/notebookmanager/entrypoint.sh /entrypoint.sh
-COPY apis/infrastructure/ /infrastructure/
+COPY ./apis/notebook-manager/notebookmanager.jar /api/notebookmanager.jar
+COPY ./apis/notebook-manager/classes/ /api/classes/
+COPY ./apis/notebook-manager/database/ /api/database/
+COPY ./apis/notebook-manager/entrypoint.sh /entrypoint.sh
+COPY ./infrastructure/ /infrastructure/
 
 RUN chmod +x /entrypoint.sh
 
