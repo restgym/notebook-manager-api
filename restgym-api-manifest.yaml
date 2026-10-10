@@ -1,0 +1,19 @@
+# RESTgym API manifest
+manifest_version: 1
+
+id: notebook-manager
+name: NoteBook Manager
+version: "0.0.1-SNAPSHOT"         # Implementation-Version of notebookmanager.jar
+description: CRUD operations on a catalog of notebooks and their prices.
+domain: e-commerce
+# license:                        # not declared in the upstream repository
+repository: https://github.com/birddevelper/NoteBookManager
+technology:
+  language: java
+  framework: Spring Boot          # 2.6.3
+  database: MySQL
+
+authentication: none
+
+server_errors:
+  similarity_threshold: 0.7
