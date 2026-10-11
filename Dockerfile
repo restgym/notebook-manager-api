@@ -17,7 +17,11 @@ RUN apt update && \
 COPY ./apis/notebook-manager/notebookmanager.jar /api/notebookmanager.jar
 COPY ./apis/notebook-manager/classes/ /api/classes/
 COPY ./apis/notebook-manager/database/ /api/database/
+COPY ./apis/notebook-manager/init-mysql.sh /api/init-mysql.sh
 COPY ./infrastructure/ /infrastructure/
+
+# MySQL database, created when the image is built (see init-mysql.sh and infrastructure/api/restgym-mysql.sh)
+RUN bash /api/init-mysql.sh
 
 # Startup script: starts the API, the collection of code coverage and the proxy (see infrastructure/api/restgym-api.sh)
 COPY ./apis/notebook-manager/entrypoint.sh /entrypoint.sh
