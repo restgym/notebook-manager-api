@@ -18,9 +18,9 @@ RUN apt update && \
 COPY ./apis/notebook-manager/notebookmanager.jar /api/notebookmanager.jar
 COPY ./apis/notebook-manager/classes/ /api/classes/
 COPY ./apis/notebook-manager/database/ /api/database/
-COPY ./apis/notebook-manager/entrypoint.sh /entrypoint.sh
 COPY ./infrastructure/ /infrastructure/
 
-RUN chmod +x /entrypoint.sh
+# Startup script: starts the API, the collection of code coverage and the proxy (see infrastructure/api/restgym-api.sh)
+COPY ./apis/notebook-manager/entrypoint.sh /entrypoint.sh
 
-CMD ["/entrypoint.sh"]
+ENTRYPOINT ["bash", "/entrypoint.sh"]
