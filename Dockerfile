@@ -1,29 +1,17 @@
-FROM ubuntu:22.04
+# Notebook Manager
+# Base image: Ubuntu 22.04, Java 11 (headless JRE), mitmproxy and the RESTgym infrastructure (see infrastructure/api/Dockerfile)
+FROM restgym-api-base:java11
 
-ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        mysql-server \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir /api && \
-    mkdir /infrastructure && \
-    mkdir /results
-
-RUN apt update && \
-    apt -y upgrade && \
-    apt -y install openjdk-11-jdk python3 python3-pip mysql-server && \
-    pip3 install mitmproxy && \
-    apt -y autoremove && \
-    apt clean && \
-    rm -rf /var/lib/apt/lists/*
-
-COPY ./apis/notebook-manager/notebookmanager.jar /api/notebookmanager.jar
-COPY ./apis/notebook-manager/classes/ /api/classes/
-COPY ./apis/notebook-manager/database/ /api/database/
-COPY ./apis/notebook-manager/init-mysql.sh /api/init-mysql.sh
-COPY ./infrastructure/ /infrastructure/
+# The API: its executable, the classes for code coverage, its specifications and scripts
+COPY ./apis/notebook-manager/ /api/
 
 # MySQL database, created when the image is built (see init-mysql.sh and infrastructure/api/restgym-mysql.sh)
 RUN bash /api/init-mysql.sh
 
-# Startup script: starts the API, the collection of code coverage and the proxy (see infrastructure/api/restgym-api.sh)
-COPY ./apis/notebook-manager/entrypoint.sh /entrypoint.sh
-
-ENTRYPOINT ["bash", "/entrypoint.sh"]
+# Startup script (in /api): starts the API, the collection of code coverage and the proxy (see infrastructure/api/restgym-api.sh)
+ENTRYPOINT ["bash", "/api/entrypoint.sh"]
