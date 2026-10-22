@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:8090",
+      "url": "http://localhost:8080",
       "description": "Generated server url"
     }
   ],
@@ -72,6 +72,9 @@
           "required": true
         },
         "responses": {
+          "400": {
+            "description": "Invalid id supplied"
+          },
           "201": {
             "description": "notebook created",
             "content": {
@@ -81,9 +84,6 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Invalid id supplied"
           },
           "404": {
             "description": "notebook not found"
@@ -157,14 +157,14 @@
           }
         ],
         "responses": {
-          "202": {
-            "description": "notebook deleted"
-          },
           "400": {
             "description": "Invalid id supplied"
           },
           "404": {
             "description": "notebook not found"
+          },
+          "202": {
+            "description": "notebook deleted"
           },
           "500": {
             "description": "Internal Error"
@@ -209,9 +209,6 @@
           "409": {
             "description": "Duplicate notebook name"
           },
-          "500": {
-            "description": "Internal Error"
-          },
           "202": {
             "description": "notebook updated",
             "content": {
@@ -221,6 +218,9 @@
                 }
               }
             }
+          },
+          "500": {
+            "description": "Internal Error"
           }
         }
       }

@@ -1,0 +1,185 @@
+swagger: "2.0"
+info:
+  title: OpenAPI definition
+  version: v0
+host: localhost:8080
+schemes:
+  - http
+paths:
+  /api/notebooks:
+    get:
+      tags:
+        - note-book-controller
+      summary: Get list of notebooks (Ordered by Id in ascending order), you must specify page number and page size
+      operationId: getnotebooks
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: page
+          description: Page index (start from 0)
+          required: true
+          type: integer
+          format: int32
+        - in: query
+          name: pageSize
+          description: Number of records per page
+          required: true
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: Successful Operation
+        "400":
+          description: Invalid parameters supplied
+        "500":
+          description: Internal Error
+    post:
+      tags:
+        - note-book-controller
+      summary: Create a new notebook
+      operationId: createnotebook
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NoteBook'
+      responses:
+        "400":
+          description: Invalid id supplied
+        "201":
+          description: notebook created
+          schema:
+            $ref: '#/definitions/NoteBook'
+        "404":
+          description: notebook not found
+        "409":
+          description: Duplicate notebook name
+        "500":
+          description: Internal Error
+  /api/notebooks/{notebookId}:
+    get:
+      tags:
+        - note-book-controller
+      summary: Get a notebook by its id
+      operationId: getnotebookById
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: notebookId
+          description: id of notebook to be retrieved
+          required: true
+          type: integer
+          format: int32
+      responses:
+        "400":
+          description: Invalid id supplied
+        "404":
+          description: notebook not found
+        "200":
+          description: Found the notebook
+          schema:
+            $ref: '#/definitions/NoteBook'
+        "500":
+          description: Internal Error
+    delete:
+      tags:
+        - note-book-controller
+      summary: Delete a notebook by its id
+      operationId: deletenotebook
+      parameters:
+        - in: path
+          name: notebookId
+          description: id of notebook to be deleted
+          required: true
+          type: integer
+          format: int32
+      responses:
+        "400":
+          description: Invalid id supplied
+        "404":
+          description: notebook not found
+        "202":
+          description: notebook deleted
+        "500":
+          description: Internal Error
+    patch:
+      tags:
+        - note-book-controller
+      summary: Update a notebook by its id
+      operationId: updatenotebook
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: notebookId
+          description: id of notebook to be updated
+          required: true
+          type: integer
+          format: int32
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/NoteBook'
+      responses:
+        "400":
+          description: Invalid id supplied
+        "404":
+          description: notebook not found
+        "409":
+          description: Duplicate notebook name
+        "202":
+          description: notebook updated
+          schema:
+            $ref: '#/definitions/NoteBook'
+        "500":
+          description: Internal Error
+definitions:
+  Link:
+    type: object
+    properties:
+      rel:
+        type: string
+      href:
+        type: string
+      hreflang:
+        type: string
+      media:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+      deprecation:
+        type: string
+      profile:
+        type: string
+      name:
+        type: string
+  NoteBook:
+    type: object
+    properties:
+      name:
+        type: string
+      currentPrice:
+        type: number
+        format: double
+      lastUpdate:
+        type: string
+        format: date-time
+      id:
+        type: integer
+        format: int32
+      links:
+        type: array
+        items:
+          $ref: '#/definitions/Link'

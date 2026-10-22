@@ -1,151 +1,149 @@
----
 openapi: 3.0.1
 info:
   title: OpenAPI definition
   version: v0
 servers:
-- url: http://localhost:8090
-  description: Generated server url
+  - url: http://localhost:8080
+    description: Generated server url
 paths:
-  "/api/notebooks":
+  /api/notebooks:
     get:
       tags:
-      - note-book-controller
-      summary: Get list of notebooks (Ordered by Id in ascending order), you must
-        specify page number and page size
+        - note-book-controller
+      summary: Get list of notebooks (Ordered by Id in ascending order), you must specify page number and page size
       operationId: getnotebooks
       parameters:
-      - name: page
-        in: query
-        description: Page index (start from 0)
-        required: true
-        schema:
-          type: integer
-          format: int32
-      - name: pageSize
-        in: query
-        description: Number of records per page
-        required: true
-        schema:
-          type: integer
-          format: int32
+        - name: page
+          in: query
+          description: Page index (start from 0)
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: pageSize
+          in: query
+          description: Number of records per page
+          required: true
+          schema:
+            type: integer
+            format: int32
       responses:
-        '200':
+        "200":
           description: Successful Operation
           content:
             application/json: {}
-        '400':
+        "400":
           description: Invalid parameters supplied
-        '500':
+        "500":
           description: Internal Error
     post:
       tags:
-      - note-book-controller
+        - note-book-controller
       summary: Create a new notebook
       operationId: createnotebook
       requestBody:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/NoteBook"
+              $ref: '#/components/schemas/NoteBook'
         required: true
       responses:
-        '201':
+        "400":
+          description: Invalid id supplied
+        "201":
           description: notebook created
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/NoteBook"
-        '400':
-          description: Invalid id supplied
-        '404':
+                $ref: '#/components/schemas/NoteBook'
+        "404":
           description: notebook not found
-        '409':
+        "409":
           description: Duplicate notebook name
-        '500':
+        "500":
           description: Internal Error
-  "/api/notebooks/{notebookId}":
+  /api/notebooks/{notebookId}:
     get:
       tags:
-      - note-book-controller
+        - note-book-controller
       summary: Get a notebook by its id
       operationId: getnotebookById
       parameters:
-      - name: notebookId
-        in: path
-        description: id of notebook to be retrieved
-        required: true
-        schema:
-          type: integer
-          format: int32
+        - name: notebookId
+          in: path
+          description: id of notebook to be retrieved
+          required: true
+          schema:
+            type: integer
+            format: int32
       responses:
-        '200':
+        "400":
+          description: Invalid id supplied
+        "404":
+          description: notebook not found
+        "200":
           description: Found the notebook
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/NoteBook"
-        '400':
-          description: Invalid id supplied
-        '404':
-          description: notebook not found
-        '500':
+                $ref: '#/components/schemas/NoteBook'
+        "500":
           description: Internal Error
     delete:
       tags:
-      - note-book-controller
+        - note-book-controller
       summary: Delete a notebook by its id
       operationId: deletenotebook
       parameters:
-      - name: notebookId
-        in: path
-        description: id of notebook to be deleted
-        required: true
-        schema:
-          type: integer
-          format: int32
+        - name: notebookId
+          in: path
+          description: id of notebook to be deleted
+          required: true
+          schema:
+            type: integer
+            format: int32
       responses:
-        '202':
-          description: notebook deleted
-        '400':
+        "400":
           description: Invalid id supplied
-        '404':
+        "404":
           description: notebook not found
-        '500':
+        "202":
+          description: notebook deleted
+        "500":
           description: Internal Error
     patch:
       tags:
-      - note-book-controller
+        - note-book-controller
       summary: Update a notebook by its id
       operationId: updatenotebook
       parameters:
-      - name: notebookId
-        in: path
-        description: id of notebook to be updated
-        required: true
-        schema:
-          type: integer
-          format: int32
+        - name: notebookId
+          in: path
+          description: id of notebook to be updated
+          required: true
+          schema:
+            type: integer
+            format: int32
       requestBody:
         content:
           application/json:
             schema:
-              "$ref": "#/components/schemas/NoteBook"
+              $ref: '#/components/schemas/NoteBook'
         required: true
       responses:
-        '202':
+        "400":
+          description: Invalid id supplied
+        "404":
+          description: notebook not found
+        "409":
+          description: Duplicate notebook name
+        "202":
           description: notebook updated
           content:
             application/json:
               schema:
-                "$ref": "#/components/schemas/NoteBook"
-        '400':
-          description: Invalid id supplied
-        '404':
-          description: notebook not found
-        '409':
-          description: Duplicate notebook name
-        '500':
+                $ref: '#/components/schemas/NoteBook'
+        "500":
           description: Internal Error
 components:
   schemas:
@@ -187,4 +185,4 @@ components:
         links:
           type: array
           items:
-            "$ref": "#/components/schemas/Link"
+            $ref: '#/components/schemas/Link'

@@ -4,7 +4,8 @@
 source /infrastructure/api/restgym-api.sh
 source /infrastructure/api/restgym-mysql.sh
 
-# MySQL, with the database created when the image is built (init-mysql.sh)
+# MySQL, with the database created when the image is built (init-mysql.sh); at its start, the API creates its table
+# (Hibernate) and inserts its sample data (InitiateDatabaseRecords), as in the original repository
 restgym_start_mysql
 
 restgym_run_api 8080 \
@@ -14,5 +15,4 @@ restgym_run_api 8080 \
         "-Dspring.datasource.url=jdbc:mysql://localhost:3306/notebook_manager?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true" \
         -Dspring.datasource.username=root \
         -Dspring.datasource.password=root123 \
-        -Dspring.jpa.hibernate.ddl-auto=none \
         -jar /api/notebookmanager.jar

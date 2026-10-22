@@ -24,12 +24,14 @@ More details (e.g., how 5XX responses are grouped into unique failures) are in t
 
 | File | Content |
 |---|---|
-| `notebookmanager.jar` | The executable of the API. |
-| `classes/` | The classes measured for code coverage: the classes of the packages of the API, as in the executable. |
-| `specifications/notebook-manager-openapi.json` | The specification given to the tools (OpenAPI 3.0.1). |
-| `specifications/notebook-manager.yaml` | The specification given to the tools (OpenAPI 3.0.1). |
-| `specifications/openapi-original.json` | The original specification (OpenAPI 3.0.1), as served by the API at `/v3/api-docs` (minified), unchanged. |
-| `database/` | `database/schema.sql` and `database/data.sql`: the schema and the data of the API, loaded into MySQL when the image is built (`init-mysql.sh`). |
+| `notebookmanager.jar` | The executable of the API, built from commit `b2764f1` (2023-02, the last commit of the original repository), unchanged (see "Changes made by RESTgym"). |
+| `classes/` | The classes measured for code coverage: the classes of the packages of the API, as in the executable (identical, verified 2026-10). |
+| `specifications/original/notebook-manager-openapi.json` | The original specification (OpenAPI 3.0.1), as served by the API at `/v3/api-docs` (minified), unchanged. |
+| `specifications/standardized/notebook-manager-openapi.json` | The specification given to the tools (OpenAPI 3.0.1): the original, formatted. |
+| `specifications/standardized/notebook-manager-openapi.yaml` | The same specification in YAML (converted with yq). |
+| `specifications/standardized/notebook-manager-swagger.json` | The same specification in Swagger 2.0 (converted with hidi). |
+| `specifications/standardized/notebook-manager-swagger.yaml` | The Swagger 2.0 version in YAML (converted with yq). |
+| `specifications/README.md` | Every difference between the specifications, in detail. |
 | `Dockerfile` | The Docker image of the API, built by RESTgym (`./restgym.sh b`). |
 | `entrypoint.sh` | Starts the API (and the services it needs) in the container. |
 | `init-mysql.sh` | Creates the MySQL database when the image is built. |
@@ -37,24 +39,31 @@ More details (e.g., how 5XX responses are grouped into unique failures) are in t
 
 ## How RESTgym runs it
 
-The image starts from the base image of RESTgym for Java 11 (`restgym/api-base:java11`), which contains the proxy and the collection of code coverage. MySQL runs in the container, with the database created when the image is built. `entrypoint.sh` points the API to it (`spring.datasource.*`), and disables the creation of the schema by Hibernate (`ddl-auto=none`), since the database is already created. The tools reach the API through the proxy of RESTgym, on port 9090.
+The image starts from the base image of RESTgym for Java 11 (`restgym/api-base:java11`), which contains the proxy and the collection of code coverage. MySQL runs in the container, with the database (empty) created when the image is built (`init-mysql.sh`), and `entrypoint.sh` points the API to it (`spring.datasource.*`). As in the original repository, the API creates its table when it starts (Hibernate, `ddl-auto=update` in its configuration), and inserts its sample data, 6 notebooks, if the table is empty (`InitiateDatabaseRecords`, a `CommandLineRunner` of its code): each run starts with these 6 notebooks. The tools reach the API through the proxy of RESTgym, on port 9090.
 
 ## Changes made by RESTgym
 
 ### API
 
-None.
+None: `notebookmanager.jar` is the build (2025-11, JDK 19) of commit `b2764f1` (2023-02, the last commit of the original repository, `master`) without changes. Verified 2026-10 by building that commit (Maven 3.8.7, JDK 19, `mvn package -DskipTests`): the two jars have the same 204 entries with the same content, except Windows line endings in `application.properties`, `pom.xml` and `pom.properties` (the jar was built from a Windows checkout).
 
 ### Specification
 
-The original specification is `openapi-original.json` (OpenAPI 3.0.1, minified): the specification that the API serves at `/v3/api-docs` (springdoc), saved unchanged from the API running in its RESTgym container (2026-10-13). `notebook-manager-openapi.json`, given to the tools, is the same specification formatted (2025-12-30), with a different server URL: `http://localhost:8090` instead of `http://localhost:8080` (springdoc writes the URL of the request). `notebook-manager.yaml` is its YAML version, added by RESTgym (same content).
+The original specification is `original/notebook-manager-openapi.json` (OpenAPI 3.0.1, minified): the specification that the API serves at `/v3/api-docs` (springdoc), saved unchanged from the API running in its RESTgym container (2026-10). The specification given to the tools is `standardized/notebook-manager-openapi.json`: the original, formatted, with no other change. It already has the server of the API in its container (`http://localhost:8080`) and no base path, and it passes the official validation. Details in `specifications/README.md`.
+
+### Integration
+
+- MySQL in the container (8.0, the package of Ubuntu 22.04), with the table and the sample data created by the API, as in the original repository. Until 2026-10, the integration created them itself, with `database/schema.sql` and `database/data.sql` (not of the original repository, which has no SQL script outside its tests), loaded when the image was built, and disabled the creation of the schema by Hibernate (`-Dspring.jpa.hibernate.ddl-auto=none` in `entrypoint.sh`). The data was the same 6 notebooks, but the schema was not that of the API ("Modified to allow test generation tools to work properly"): without the unique constraint on `name` (`@Column(name = "name", unique = true)` in the entity), so the API accepted notebooks with the name of an existing one (201) instead of answering 409 ("Duplicate entry", verified at runtime with both schemas); and `last_update` was a `timestamp` updated by MySQL instead of a `datetime`. Both files were removed: the results of earlier runs may differ on notebooks with duplicate names.
 
 ## Endpoints that may interfere with authentication
 
-RESTgym handles the authentication of the requests, and the tools are not aware of it: an endpoint that ends or changes the session of RESTgym (e.g., logout, login as another user, change or deletion of the user of the proxy, of its password or of its roles) may make the tools fail for the rest of the run. Such endpoints may be removed from the specifications given to the tools.
+RESTgym handles the authentication of the requests, and the tools are not aware of it: an endpoint that ends or changes the session of RESTgym (e.g., logout, login as another user, change or deletion of the user of the proxy, of its password or of its roles) may make the tools fail for the rest of the run. The proxy blocks the requests that would end its session (`471 Blocked by RESTgym`), instead of removing the endpoints from the specifications given to the tools.
 
 None: RESTgym does not authenticate the requests to this API (it needs no authentication), so no endpoint can end or change a session of RESTgym.
 
-## To verify
+## External services (verified 2026-10)
 
-- Where `notebookmanager.jar` was built from, and whether its source was changed.
+None. The API uses only the MySQL of its container:
+
+- **Code:** no class of the API uses a network client (HTTP, sockets, mail, messaging); its only URL is the MySQL database on `localhost`. Its libraries include the Jersey client (`jersey-client`, a dependency of the Jersey starter of Spring Boot), which no class of the API uses.
+- **Runtime**, on the image built from the current files of this repository, with a capture of all the traffic of the container except the requests to the proxy and the loopback: the container runs only the proxy, the API (MySQL on `localhost:3306`) and MySQL; no packet during the startup and 150 seconds idle, during requests to the 5 operations of the standardized specification, nor during a flow that creates, lists, reads, updates and deletes a notebook.
